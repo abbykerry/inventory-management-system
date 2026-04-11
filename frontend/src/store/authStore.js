@@ -1,1 +1,21 @@
-// TODO (frontend/login-ui): implement global auth state (JWT + user profile)
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+const useAuthStore = create(
+  persist(
+    (set) => ({
+      token: null,
+      user: null,
+
+      setAuth: (token, user) => set({ token, user }),
+
+      logout: () => set({ token: null, user: null }),
+    }),
+    {
+      name: 'auth-storage',
+      partialState: (state) => ({ token: state.token, user: state.user }),
+    }
+  )
+);
+
+export default useAuthStore;
