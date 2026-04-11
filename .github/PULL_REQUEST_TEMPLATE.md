@@ -4,12 +4,6 @@
 <!-- Describe what this PR does and why. Reference any related issues. -->
 
 
-## Type of Change
-- [ ] Feature
-- [ ] Bug Fix
-- [ ] Refactor
-- [ ] Docs / Config
-
 ## Domain
 - [ ] Frontend (`frontend/`)
 - [ ] Backend (`backend/`)
