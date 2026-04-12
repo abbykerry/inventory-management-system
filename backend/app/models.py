@@ -2,9 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-# -------------------
+
 # Category Model
-# -------------------
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -13,9 +13,9 @@ class Category(db.Model):
     products = db.relationship('Product', backref='category')
 
 
-# -------------------
+
 # Supplier Model
-# -------------------
+
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -23,9 +23,8 @@ class Supplier(db.Model):
     products = db.relationship('Product', backref='supplier')
 
 
-# -------------------
+
 # Product Model
-# -------------------
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -36,9 +35,9 @@ class Product(db.Model):
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
 
 
-# -------------------
+
 # Inventory Transaction Model
-# -------------------
+
 class InventoryTransaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
