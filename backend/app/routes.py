@@ -1,10 +1,14 @@
 from flask import Blueprint, request, jsonify
-from app.models import db, Product
+from app import db
+from app.models import Product, InventoryTransaction
 
+# Blueprint (this groups all product-related routes)
 product_bp = Blueprint('products', __name__)
 
-# CREATE PRODUCT
 
+# -----------------------------
+# CREATE PRODUCT
+# -----------------------------
 @product_bp.route('/products', methods=['POST'])
 def create_product():
     data = request.json
@@ -18,16 +22,21 @@ def create_product():
     db.session.add(new_product)
     db.session.commit()
 
-    return jsonify({"message": "Product created"}), 201
+    return jsonify({
+        "message": "Product created",
+        "product_id": new_product.id
+    }), 201
 
 
-
+# -----------------------------
 # GET ALL PRODUCTS
+# -----------------------------
 @product_bp.route('/products', methods=['GET'])
 def get_products():
     products = Product.query.all()
 
     result = []
+
     for p in products:
         result.append({
             "id": p.id,
@@ -39,9 +48,9 @@ def get_products():
     return jsonify(result), 200
 
 
-
+# -----------------------------
 # UPDATE PRODUCT
-
+# -----------------------------
 @product_bp.route('/products/<int:id>', methods=['PUT'])
 def update_product(id):
     product = Product.query.get(id)
@@ -73,3 +82,52 @@ def delete_product(id):
     db.session.commit()
 
     return jsonify({"message": "Product deleted"}), 200
+# INVENTORY TRANSACTIONS (MAIN TASK)
+
+@product_bp.route('/transactions', methods=['POST'])
+def handle_transaction():
+    data = request.json
+
+    product = Product.query.get(data['product_id'])
+
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    quantity = data['quantity']
+    transaction_type = data['transaction_type']
+
+    # basic validation
+    if quantity <= 0:
+        return jsonify({"error": "Quantity must be greater than 0"}), 400
+
+    
+    # ADD STOCK
+
+    if transaction_type == "in":
+        product.stock += quantity
+
+    # -------------------------
+    # REMOVE STOCK
+    # -------------------------
+    elif transaction_type == "out":
+        if product.stock < quantity:
+            return jsonify({"error": "Not enough stock"}), 400
+        product.stock -= quantity
+
+    else:
+        return jsonify({"error": "Invalid transaction type"}), 400
+
+    # Save transaction record (ledger system)
+    transaction = InventoryTransaction(
+        product_id=product.id,
+        quantity=quantity,
+        transaction_type=transaction_type
+    )
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Transaction successful",
+        "current_stock": product.stock
+    }), 201
