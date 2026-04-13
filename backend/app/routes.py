@@ -6,9 +6,8 @@ from app.models import Product, InventoryTransaction
 product_bp = Blueprint('products', __name__)
 
 
-# -----------------------------
+
 # CREATE PRODUCT
-# -----------------------------
 @product_bp.route('/products', methods=['POST'])
 def create_product():
     data = request.json
@@ -28,9 +27,9 @@ def create_product():
     }), 201
 
 
-# -----------------------------
+
 # GET ALL PRODUCTS
-# -----------------------------
+
 @product_bp.route('/products', methods=['GET'])
 def get_products():
     products = Product.query.all()
@@ -48,9 +47,9 @@ def get_products():
     return jsonify(result), 200
 
 
-# -----------------------------
+
 # UPDATE PRODUCT
-# -----------------------------
+
 @product_bp.route('/products/<int:id>', methods=['PUT'])
 def update_product(id):
     product = Product.query.get(id)
@@ -106,9 +105,9 @@ def handle_transaction():
     if transaction_type == "in":
         product.stock += quantity
 
-    # -------------------------
+    
     # REMOVE STOCK
-    # -------------------------
+    
     elif transaction_type == "out":
         if product.stock < quantity:
             return jsonify({"error": "Not enough stock"}), 400
