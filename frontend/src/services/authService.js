@@ -1,1 +1,7 @@
-// TODO (frontend/login-ui): implement register and login API calls
+import api from './api';
+
+export const registerUser = (payload) =>
+  api.post('/auth/register', payload).then((res) => res.data);
+
+export const loginUser = (payload) =>
+  api.post('/auth/login', payload).then((res) => res.data);

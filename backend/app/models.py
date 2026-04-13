@@ -1,20 +1,49 @@
-from flask_sqlalchemy import SQLAlchemy
+from app import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-db = SQLAlchemy()
+
+# ROLE MODEL (
+
+class Role(db.Model):
+    __tablename__ = "roles"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+
+    users = db.relationship("User", backref="role", lazy=True)
 
 
-# Category Model
+
+# USER MODEL 
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+
+# CATEGORY MODEL 
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
-    # relationship
     products = db.relationship('Product', backref='category')
 
 
 
-# Supplier Model
+# SUPPLIER MODEL 
 
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,7 +53,8 @@ class Supplier(db.Model):
 
 
 
-# Product Model
+# PRODUCT MODEL 
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -36,7 +66,7 @@ class Product(db.Model):
 
 
 
-# Inventory Transaction Model
+# INVENTORY TRANSACTION 
 
 class InventoryTransaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,7 +74,6 @@ class InventoryTransaction(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     quantity = db.Column(db.Integer)
 
-    # "in" for adding stock, "out" for removing stock
-    transaction_type = db.Column(db.String(10))
+    transaction_type = db.Column(db.String(10))  # "in" or "out"
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
