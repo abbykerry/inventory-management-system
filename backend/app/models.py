@@ -36,42 +36,47 @@ class User(db.Model):
 # CATEGORY MODEL 
 
 class Category(db.Model):
+    __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
-    products = db.relationship('Product', backref='category')
+    products = db.relationship('Product', backref='category', lazy=True)
 
 
 
 # SUPPLIER MODEL 
 
 class Supplier(db.Model):
+    __tablename__ = "suppliers"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
-    products = db.relationship('Product', backref='supplier')
+    products = db.relationship('Product', backref='supplier', lazy=True) #load related data only when needed
 
 
 
 # PRODUCT MODEL 
 
 class Product(db.Model):
+    __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float)
     stock = db.Column(db.Integer, default=0)
 
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
+    #foreign keys reference table names, not class names
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'))
 
 
 
 # INVENTORY TRANSACTION 
 
 class InventoryTransaction(db.Model):
+    __tablename__ = "inventory_transactions"
     id = db.Column(db.Integer, primary_key=True)
 
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     quantity = db.Column(db.Integer)
 
     transaction_type = db.Column(db.String(10))  # "in" or "out"
