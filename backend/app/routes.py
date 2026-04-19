@@ -6,11 +6,14 @@ from app.models import Product, InventoryTransaction
 product_bp = Blueprint('products', __name__)
 
 
-
 # CREATE PRODUCT
 @product_bp.route('/products', methods=['POST'])
 def create_product():
     data = request.json
+
+    # FIX: prevent KeyError + invalid request
+    if not data or 'name' not in data:
+        return jsonify({"error": "Product name is required"}), 400
 
     new_product = Product(
         name=data['name'],
@@ -27,9 +30,7 @@ def create_product():
     }), 201
 
 
-
 # GET ALL PRODUCTS
-
 @product_bp.route('/products', methods=['GET'])
 def get_products():
     products = Product.query.all()
@@ -47,9 +48,7 @@ def get_products():
     return jsonify(result), 200
 
 
-
 # UPDATE PRODUCT
-
 @product_bp.route('/products/<int:id>', methods=['PUT'])
 def update_product(id):
     product = Product.query.get(id)
@@ -67,9 +66,7 @@ def update_product(id):
     return jsonify({"message": "Product updated"}), 200
 
 
-
 # DELETE PRODUCT
-
 @product_bp.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
     product = Product.query.get(id)
@@ -81,11 +78,19 @@ def delete_product(id):
     db.session.commit()
 
     return jsonify({"message": "Product deleted"}), 200
-# INVENTORY TRANSACTIONS (MAIN TASK)
 
+
+# INVENTORY TRANSACTIONS (MAIN TASK)
 @product_bp.route('/transactions', methods=['POST'])
 def handle_transaction():
     data = request.json
+
+    # FIX: prevent KeyError crashes
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
+
+    if 'product_id' not in data or 'quantity' not in data or 'transaction_type' not in data:
+        return jsonify({"error": "Missing required fields"}), 400
 
     product = Product.query.get(data['product_id'])
 
@@ -95,19 +100,15 @@ def handle_transaction():
     quantity = data['quantity']
     transaction_type = data['transaction_type']
 
-    # basic validation
+    # validate quantity
     if quantity <= 0:
         return jsonify({"error": "Quantity must be greater than 0"}), 400
 
-    
     # ADD STOCK
-
     if transaction_type == "in":
         product.stock += quantity
 
-    
     # REMOVE STOCK
-    
     elif transaction_type == "out":
         if product.stock < quantity:
             return jsonify({"error": "Not enough stock"}), 400
