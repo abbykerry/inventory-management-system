@@ -1,1 +1,13 @@
-// TODO (frontend/login-ui): wire AppRouter here
+import AppRouter from './routes/AppRouter';
+import Toast from './components/common/Toast';
+
+function App() {
+  return (
+    <>
+      <AppRouter />
+      <Toast />
+    </>
+  );
+}
+
+export default App;
